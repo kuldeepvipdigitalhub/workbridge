@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+
+.auth-box{
+max-width:450px;
+margin:auto;
+padding:35px;
+border-radius:12px;
+background:#2b2b2b;
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
+animation:fadeIn .7s ease;
+}
+
+.form-control{
+background:#3b3b3b;
+border:1px solid #555;
+color:white;
+}
+
+.form-control::placeholder{
+color:#bbb;
+}
+
+.form-control:focus{
+border-color:#ffc107;
+box-shadow:none;
+background:#3b3b3b;
+}
+
+.btn-main{
+background:#ffc107;
+color:black;
+font-weight:bold;
+}
+
+.btn-main:hover{
+background:#ffb300;
+}
+
+</style>
+
+
+<div class="auth-box">
+
+<h3 class="text-center text-warning mb-4">
+Create WorkBridge Account
+</h3>
+
+<form method="POST">
+
+<div class="mb-3">
+<label class="form-label">Full Name</label>
+
+<input name="name"
+class="form-control"
+placeholder="Enter full name"
+required>
+</div>
+
+
+<div class="mb-3">
+<label class="form-label">Email</label>
+
+<input type="email"
+name="email"
+class="form-control"
+placeholder="Enter email"
+required>
+</div>
+
+
+<div class="mb-3">
+<label class="form-label">Password</label>
+
+<input type="password"
+name="password"
+class="form-control"
+placeholder="Create password"
+required>
+</div>
+
+
+<div class="mb-3">
+<label class="form-label">Confirm Password</label>
+
+<input type="password"
+name="confirm_password"
+class="form-control"
+placeholder="Confirm password"
+required>
+</div>
+
+
+<div class="mb-3">
+<label class="form-label">Account Type</label>
+
+<select name="role"
+class="form-control"
+required>
+
+<option value="">Select role</option>
+
+<option value="client">
+Client (Hire developers)
+</option>
+
+<option value="developer">
+Developer (Work on projects)
+</option>
+
+</select>
+
+</div>
+
+
+<button class="btn btn-main w-100">
+Create Account
+</button>
+
+
+<p class="text-center mt-3">
+
+Already registered?
+
+<a href="{{ url_for('main.login') }}" class="text-warning">
+
+Login here
+
+</a>
+
+</p>
+
+</form>
+
+</div>
+
+{% endblock %}

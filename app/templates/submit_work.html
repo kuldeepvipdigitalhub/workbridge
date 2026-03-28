@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3 class="text-warning mb-4">
+
+Submit Project Work
+
+</h3>
+
+<form method="POST" enctype="multipart/form-data">
+
+<label>Upload Project File</label>
+
+<input type="file"
+name="file"
+class="form-control mb-3">
+
+<label>GitHub Repository</label>
+
+<input type="text"
+name="github"
+class="form-control mb-3"
+placeholder="https://github.com/...">
+
+<label>Live Website Link</label>
+
+<input type="text"
+name="live"
+class="form-control mb-3"
+placeholder="https://example.com">
+
+<label>Notes for Client</label>
+
+<textarea name="notes"
+class="form-control mb-3"></textarea>
+
+<button class="btn btn-success">
+
+Submit Work
+
+</button>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+
+<h3 class="text-warning mb-4">
+Search Results for "{{ query }}"
+</h3>
+
+{% if projects %}
+
+<div class="row">
+
+{% for project in projects %}
+
+<div class="col-md-6">
+
+<div class="card bg-dark text-light p-3 mb-3">
+
+<h5 class="text-warning">
+{{ project.title }}
+</h5>
+
+<p>
+{{ project.description[:120] }}...
+</p>
+
+<p>
+<strong>Budget:</strong> ₹{{ project.budget }}
+</p>
+
+<p>
+<strong>Category:</strong> {{ project.category }}
+</p>
+
+<a href="{{ url_for('main.project_details', project_id=project.id) }}"
+class="btn btn-warning btn-sm">
+
+View Project
+
+</a>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info">
+No projects found.
+</div>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

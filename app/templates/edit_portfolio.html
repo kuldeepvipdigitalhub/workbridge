@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3 class="text-warning mb-4">
+Edit Portfolio
+</h3>
+
+<form method="POST">
+
+<input name="title"
+class="form-control mb-2"
+value="{{ portfolio.title }}">
+
+<textarea name="description"
+class="form-control mb-2">
+
+{{ portfolio.description }}
+
+</textarea>
+
+<input name="link"
+class="form-control mb-3"
+value="{{ portfolio.link }}">
+
+<button class="btn btn-warning">
+Update Portfolio
+</button>
+
+</form>
+
+{% endblock %}

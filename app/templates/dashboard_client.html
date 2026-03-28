@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="mb-4 text-warning">Client Dashboard</h2>
+
+<!-- ================= CREATE PROJECT ================= -->
+
+<div class="card bg-dark text-light p-4 mb-4 shadow project-card">
+
+<h4 class="text-warning mb-3">Post New Project</h4>
+
+<form method="POST" action="{{ url_for('main.create_project') }}">
+
+<label>Project Title</label>
+
+<input name="title"
+class="form-control mb-2"
+placeholder="Example: Build Ecommerce Website"
+required>
+
+<small class="text-muted">
+Give a clear title so developers understand your requirement.
+</small>
+
+
+<label class="mt-3">Project Description</label>
+
+<textarea name="description"
+class="form-control mb-2"
+placeholder="Describe your project requirements clearly"
+required></textarea>
+
+
+<label class="mt-2">Budget</label>
+
+<input name="budget"
+type="number"
+class="form-control mb-2"
+placeholder="Enter your maximum budget"
+required>
+
+
+<label class="mt-2">Category</label>
+
+<select name="category"
+id="categorySelect"
+class="form-control mb-2">
+
+<option value="Web Development">Web Development</option>
+<option value="Mobile App">Mobile App</option>
+<option value="AI / ML">AI / ML</option>
+<option value="UI/UX Design">UI/UX Design</option>
+<option value="Data Science">Data Science</option>
+<option value="Other">Other</option>
+
+</select>
+
+<input name="custom_category"
+id="customCategory"
+class="form-control mb-2"
+placeholder="Enter custom category"
+style="display:none;">
+
+
+<label class="mt-2">Deadline</label>
+
+<input name="deadline"
+type="date"
+class="form-control mb-3"
+required>
+
+<button class="btn btn-warning">
+Post Project
+</button>
+
+</form>
+
+</div>
+
+<hr>
+
+
+<!-- ================= PROJECT LIST ================= -->
+
+<h4 class="text-warning mb-3">Your Projects</h4>
+
+{% if projects %}
+
+{% for project in projects %}
+
+<div class="card bg-secondary text-light p-3 mb-4 shadow project-card">
+
+<h5 class="text-warning">{{ project.title }}</h5>
+
+<p>{{ project.description[:150] }}...</p>
+
+<div class="row">
+
+<div class="col-md-3">
+<strong>Budget</strong><br>
+₹{{ project.budget }}
+</div>
+
+<div class="col-md-3">
+<strong>Category</strong><br>
+<span class="badge bg-dark">
+{{ project.category }}
+</span>
+</div>
+
+<div class="col-md-3">
+<strong>Deadline</strong><br>
+{{ project.deadline }}
+</div>
+
+<div class="col-md-3">
+<strong>Total Bids</strong><br>
+{{ project.bids|length }}
+</div>
+
+</div>
+
+
+<p class="mt-3">
+
+<strong>Status:</strong>
+
+{% if project.status == "open" %}
+<span class="badge bg-success">Open</span>
+
+{% elif project.status == "in_progress" %}
+<span class="badge bg-warning text-dark">In Progress</span>
+
+{% elif project.status == "submitted" %}
+<span class="badge bg-info">Work Submitted</span>
+
+{% else %}
+<span class="badge bg-primary">Completed</span>
+{% endif %}
+
+</p>
+
+
+<!-- CLIENT ACTIONS -->
+
+{% if project.status == "submitted" %}
+
+<div class="alert alert-warning">
+Developer has submitted the work. Please review.
+</div>
+
+<a href="{{ url_for('main.review_work', project_id=project.id) }}"
+class="btn btn-info btn-sm">
+
+Review Work
+
+</a>
+
+<a href="{{ url_for('main.complete_project', project_id=project.id) }}"
+class="btn btn-success btn-sm">
+
+Approve & Mark Completed
+
+</a>
+
+{% endif %}
+
+
+{% if project.status == "completed" %}
+
+<a href="{{ url_for('main.payment_options', project_id=project.id) }}"
+class="btn btn-warning btn-sm mb-2">
+
+Pay Developer
+
+</a>
+
+{% endif %}
+
+<hr>
+
+
+<!-- ================= BIDS ================= -->
+
+<h6 class="text-warning">Bids</h6>
+
+{% if project.bids %}
+
+{% for bid in project.bids %}
+
+<div class="bg-dark p-3 mb-2 rounded shadow-sm">
+
+<div class="d-flex justify-content-between">
+
+<div>
+
+<strong>{{ bid.developer.name if bid.developer else "Developer" }}</strong>
+
+<a href="{{ url_for('main.developer_profile', user_id=bid.developer.id) }}"
+class="btn btn-outline-warning btn-sm ms-2">
+
+Profile
+
+</a>
+
+</div>
+
+<span class="badge 
+{% if bid.status == 'accepted' %}bg-success
+{% elif bid.status == 'rejected' %}bg-danger
+{% else %}bg-info{% endif %}">
+
+{{ bid.status }}
+
+</span>
+
+</div>
+
+
+<p class="mt-2">
+<strong>Bid Amount:</strong> ₹{{ bid.bid_amount }}
+</p>
+
+<p>
+{{ bid.proposal }}
+</p>
+
+
+{% if project.status == "open" and bid.status == "pending" %}
+
+<a href="{{ url_for('main.accept_bid', bid_id=bid.id) }}"
+class="btn btn-success btn-sm">
+
+Accept
+
+</a>
+
+<a href="{{ url_for('main.reject_bid', bid_id=bid.id) }}"
+class="btn btn-danger btn-sm">
+
+Reject
+
+</a>
+
+{% endif %}
+
+
+{% if bid.status == "accepted" %}
+
+<a href="{{ url_for('main.chat', project_id=project.id, user_id=bid.developer.id) }}"
+class="btn btn-warning btn-sm">
+
+Chat
+
+</a>
+
+{% endif %}
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<div class="alert alert-info">
+No bids yet.
+</div>
+
+{% endif %}
+
+
+<!-- ================= REVIEW ================= -->
+
+{% set has_review = project.reviews | selectattr('client_id','equalto',current_user.id) | list %}
+
+{% if project.status == "completed" and not has_review %}
+
+<div class="mt-3 bg-dark p-3 rounded">
+
+<h6 class="text-warning">Leave Review</h6>
+
+<form method="POST"
+action="{{ url_for('main.submit_review', project_id=project.id) }}">
+
+<select name="rating"
+class="form-control mb-2"
+required>
+
+<option value="">Select Rating</option>
+<option value="5">⭐⭐⭐⭐⭐</option>
+<option value="4">⭐⭐⭐⭐</option>
+<option value="3">⭐⭐⭐</option>
+<option value="2">⭐⭐</option>
+<option value="1">⭐</option>
+
+</select>
+
+<textarea name="comment"
+class="form-control mb-2"
+placeholder="Write your feedback..."
+required></textarea>
+
+<button class="btn btn-warning btn-sm">
+Submit Review
+</button>
+
+</form>
+
+</div>
+
+{% endif %}
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<div class="alert alert-info">
+You have not posted any projects yet.
+</div>
+
+{% endif %}
+
+<style>
+
+.project-card{
+transition:0.3s;
+border-radius:10px;
+}
+
+.project-card:hover{
+transform:translateY(-6px);
+box-shadow:0 10px 25px rgba(0,0,0,.5);
+}
+
+</style>
+
+
+<script>
+
+const categorySelect = document.getElementById("categorySelect");
+const customCategory = document.getElementById("customCategory");
+
+if(categorySelect){
+
+categorySelect.addEventListener("change",function(){
+
+if(this.value==="Other"){
+customCategory.style.display="block";
+}else{
+customCategory.style.display="none";
+}
+
+});
+
+}
+
+</script>
+
+{% endblock %}

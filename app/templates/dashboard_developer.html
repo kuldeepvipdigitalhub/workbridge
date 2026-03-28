@@ -1,0 +1,629 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid">
+
+<h2 class="text-warning mb-4">
+Developer Dashboard
+</h2>
+
+<!-- PROFILE HEADER -->
+
+<div class="card bg-dark text-light p-4 mb-4 shadow">
+
+<div class="row align-items-center">
+
+<div class="col-md-2 text-center">
+
+<div class="avatar-circle">
+{{ current_user.name[0] }}
+</div>
+
+</div>
+
+<div class="col-md-6">
+
+<h4 class="text-warning">
+{{ current_user.name }}
+</h4>
+
+<p class="mb-1">
+{{ current_user.email }}
+</p>
+
+<p class="text-muted">
+{{ current_user.skills if current_user.skills else "No skills added" }}
+</p>
+
+</div>
+
+<div class="col-md-4 text-end">
+
+<a href="{{ url_for('main.add_portfolio') }}"
+class="btn btn-warning btn-sm">
+
+Add Portfolio
+</a>
+
+<a href="{{ url_for('main.withdraw') }}"
+class="btn btn-success btn-sm">
+
+Withdraw
+</a>
+
+{% if current_user.github %}
+<a href="{{ current_user.github }}"
+target="_blank"
+class="btn btn-dark btn-sm">
+
+GitHub
+</a>
+{% endif %}
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- WALLET SECTION -->
+
+<div class="row text-center mb-4">
+
+<div class="col-md-4">
+
+<div class="card bg-secondary text-light p-4 shadow stat-card">
+
+<h3>₹{{ total_earnings }}</h3>
+<p>Total Earnings</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="card bg-danger text-light p-4 shadow stat-card">
+
+<h3>₹{{ withdrawn }}</h3>
+<p>Total Withdrawn</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="card bg-success text-light p-4 shadow stat-card">
+
+<h3>₹{{ balance }}</h3>
+<p>Available Balance</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- DASHBOARD STATS -->
+
+<div class="row text-center mb-5">
+
+<div class="col-md-3">
+
+<div class="card bg-primary text-light p-4 shadow stat-card">
+
+<h3>{{ available_projects|length }}</h3>
+<p>Available Projects</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card bg-info text-light p-4 shadow stat-card">
+
+<h3>{{ my_bids|length }}</h3>
+<p>Total Bids</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card bg-warning text-dark p-4 shadow stat-card">
+
+<h3>{{ active_projects|length }}</h3>
+<p>Active Projects</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card bg-success text-light p-4 shadow stat-card">
+
+<h3>{{ completed_projects|length }}</h3>
+<p>Completed Projects</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- AVAILABLE PROJECTS -->
+
+<h4 class="text-warning mb-3">
+Available Projects
+</h4>
+
+{% if available_projects %}
+
+<div class="row">
+
+{% for project in available_projects %}
+
+<div class="col-md-6">
+
+<div class="card bg-dark text-light p-3 mb-3 shadow project-card">
+
+<h5 class="text-warning">
+{{ project.title }}
+</h5>
+
+<p>
+{{ project.description[:120] }}...
+</p>
+
+<p>
+<strong>Client:</strong> {{ project.client.name }}
+</p>
+
+<p>
+<strong>Budget:</strong> ₹{{ project.budget }}
+</p>
+
+<p>
+<strong>Deadline:</strong> {{ project.deadline }}
+</p>
+
+<div class="d-flex gap-2">
+
+<a href="{{ url_for('main.project_details', project_id=project.id) }}"
+class="btn btn-outline-warning btn-sm">
+
+View
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info">
+No projects available.
+</div>
+
+{% endif %}
+
+<!-- my bid -->
+
+<h4 class="text-warning mt-5 mb-3">
+My Bids
+</h4>
+
+{% if my_bids %}
+
+<table class="table table-dark table-striped">
+
+<tr>
+<th>Project</th>
+<th>Amount</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+{% for bid in my_bids %}
+
+<tr>
+
+<td>{{ bid.project.title }}</td>
+
+<td>₹{{ bid.bid_amount }}</td>
+
+<td>
+<span class="badge 
+{% if bid.status == 'pending' %}bg-warning text-dark
+{% elif bid.status == 'accepted' %}bg-success
+{% else %}bg-danger{% endif %}">
+{{ bid.status }}
+</span>
+</td>
+
+<td>
+
+{% if bid.status == "pending" %}
+
+<a href="{{ url_for('main.edit_bid_page', project_id=bid.project_id) }}"
+class="btn btn-info btn-sm">
+
+Edit
+
+</a>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% else %}
+
+<div class="alert alert-info">
+No bids yet.
+</div>
+
+{% endif %}
+
+
+<!-- ACTIVE PROJECTS -->
+
+<h4 class="text-warning mt-5 mb-3">
+Active Projects
+</h4>
+
+{% if active_projects %}
+
+{% for project in active_projects %}
+
+<div class="card bg-dark text-light p-3 mb-3 shadow project-card">
+
+<h5 class="text-warning">
+{{ project.title }}
+</h5>
+
+<p>{{ project.description[:120] }}...</p>
+
+<div class="row">
+
+<div class="col-md-3">
+<strong>Client:</strong> {{ project.client.name }}
+</div>
+
+<div class="col-md-3">
+<strong>Budget:</strong> ₹{{ project.budget }}
+</div>
+
+<div class="col-md-3">
+<strong>Deadline:</strong> {{ project.deadline }}
+</div>
+
+<div class="col-md-3">
+<span class="badge bg-warning text-dark">
+In Progress
+</span>
+</div>
+
+</div>
+
+<hr>
+
+<div class="d-flex gap-2">
+
+<a href="{{ url_for('main.project_details', project_id=project.id) }}"
+class="btn btn-warning btn-sm">
+View
+</a>
+
+<a href="{{ url_for('main.chat', project_id=project.id, user_id=project.client_id) }}"
+class="btn btn-info btn-sm">
+Chat Client
+</a>
+
+<a href="{{ url_for('main.submit_work', project_id=project.id) }}"
+class="btn btn-success btn-sm">
+Submit Work
+</a>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<div class="alert alert-info">
+No active projects.
+</div>
+
+{% endif %}
+
+
+
+<!-- COMPLETED PROJECTS -->
+
+<h4 class="text-warning mt-5 mb-3">
+Completed Projects
+</h4>
+
+{% if completed_projects %}
+
+<div class="row">
+
+{% for project in completed_projects %}
+
+<div class="col-md-4">
+
+<div class="card bg-secondary text-light p-3 mb-3 shadow">
+
+<h5>{{ project.title }}</h5>
+
+<p>Client: {{ project.client.name }}</p>
+
+<p>Budget: ₹{{ project.budget }}</p>
+
+<span class="badge bg-success">
+Completed
+</span>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info">
+No completed projects.
+</div>
+
+{% endif %}
+
+
+
+<!-- PORTFOLIO -->
+
+<h4 class="text-warning mt-5">
+My Portfolio
+</h4>
+
+{% if portfolios %}
+
+<div class="row">
+
+{% for p in portfolios %}
+
+<div class="col-md-4">
+
+<div class="card bg-dark text-light p-3 mb-3 shadow">
+
+<h5>{{ p.title }}</h5>
+
+<p>{{ p.description }}</p>
+
+<div class="d-flex gap-2">
+
+<a href="{{ p.link }}"
+target="_blank"
+class="btn btn-warning btn-sm">
+View
+</a>
+
+<a href="{{ url_for('main.edit_portfolio', portfolio_id=p.id) }}"
+class="btn btn-info btn-sm">
+Edit
+</a>
+
+<a href="{{ url_for('main.delete_portfolio', portfolio_id=p.id) }}"
+class="btn btn-danger btn-sm">
+Delete
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info">
+No portfolio added.
+</div>
+
+{% endif %}
+
+
+
+<!-- PAYMENT HISTORY -->
+
+<h4 class="text-warning mt-5">
+Payment History
+</h4>
+
+{% if payments %}
+
+<table class="table table-dark table-striped">
+
+<tr>
+<th>Project</th>
+<th>Amount</th>
+<th>Method</th>
+<th>Status</th>
+</tr>
+
+{% for p in payments %}
+
+<tr>
+
+<td>{{ p.project.title }}</td>
+
+<td>₹{{ p.developer_amount }}</td>
+
+<td>{{ p.method }}</td>
+
+<td>
+
+{% if p.status == "completed" %}
+
+<span class="badge bg-success">
+Completed
+</span>
+
+{% else %}
+
+<span class="badge bg-warning text-dark">
+Pending
+</span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% else %}
+
+<div class="alert alert-info">
+No payments yet.
+</div>
+
+{% endif %}
+
+
+
+<!-- WITHDRAW HISTORY -->
+
+<h4 class="text-warning mt-5">
+Withdraw History
+</h4>
+
+{% if withdraw_requests %}
+
+<table class="table table-dark table-striped">
+
+<tr>
+<th>Amount</th>
+<th>Method</th>
+<th>Status</th>
+<th>Date</th>
+</tr>
+
+{% for w in withdraw_requests %}
+
+<tr>
+
+<td>₹{{ w.amount }}</td>
+
+<td>{{ w.method }}</td>
+
+<td>
+
+{% if w.status == "completed" %}
+
+<span class="badge bg-success">
+Completed
+</span>
+
+{% else %}
+
+<span class="badge bg-warning text-dark">
+Pending
+</span>
+
+{% endif %}
+
+</td>
+
+<td>{{ w.created_at }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% else %}
+
+<div class="alert alert-info">
+No withdraw requests.
+</div>
+
+{% endif %}
+
+
+
+<style>
+
+.avatar-circle{
+width:80px;
+height:80px;
+border-radius:50%;
+background:#ffc107;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:30px;
+color:black;
+margin:auto;
+}
+
+.stat-card{
+transition:.3s;
+border-radius:10px;
+}
+
+.stat-card:hover{
+transform:translateY(-6px);
+}
+
+.project-card{
+transition:.3s;
+border-radius:10px;
+}
+
+.project-card:hover{
+transform:translateY(-6px);
+box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+</style>
+
+</div>
+
+{% endblock %}

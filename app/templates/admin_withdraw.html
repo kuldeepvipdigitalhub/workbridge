@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3 class="text-warning mb-4">
+Withdraw Platform Revenue
+</h3>
+
+<div class="card bg-dark text-light p-4">
+
+<form method="POST">
+
+<label>Amount</label>
+
+<input type="number"
+name="amount"
+class="form-control mb-3"
+required>
+
+<label>Method</label>
+
+<select name="method"
+class="form-control mb-3">
+
+<option>UPI</option>
+<option>Bank Transfer</option>
+
+</select>
+
+<label>Details</label>
+
+<input name="details"
+class="form-control mb-3"
+placeholder="UPI ID or Bank Details">
+
+<button class="btn btn-warning">
+
+Withdraw
+
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}

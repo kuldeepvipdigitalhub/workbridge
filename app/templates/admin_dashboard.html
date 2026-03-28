@@ -1,0 +1,612 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+
+.admin-container{
+display:flex;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:240px;
+background:#0f0f0f;
+padding:20px;
+min-height:100vh;
+}
+
+.sidebar a{
+display:block;
+color:white;
+padding:10px;
+margin-bottom:8px;
+text-decoration:none;
+border-radius:6px;
+transition:.3s;
+}
+
+.sidebar a:hover{
+background:#ffc107;
+color:black;
+}
+
+/* CONTENT */
+
+.dashboard-content{
+flex:1;
+padding:25px;
+}
+
+/* STATS */
+
+.stat-card{
+transition:.3s;
+border-radius:10px;
+}
+
+.stat-card:hover{
+transform:translateY(-6px);
+box-shadow:0 10px 20px rgba(0,0,0,.5);
+}
+
+/* TABLE */
+
+.table-container{
+max-height:350px;
+overflow-y:auto;
+}
+
+</style>
+
+<div class="admin-container">
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+<h4 class="text-warning mb-4">Admin Panel</h4>
+
+<a href="#">Dashboard</a>
+<a href="#users">Users</a>
+<a href="#projects">Projects</a>
+<a href="#payments">Payments</a>
+<a href="#withdraws">Withdraw Requests</a>
+<a href="#analytics">Analytics</a>
+<a href="{{ url_for('main.home') }}">Home</a>
+
+</div>
+
+
+<!-- MAIN CONTENT -->
+
+<div class="dashboard-content">
+
+<h2 class="text-warning mb-4">Admin Dashboard</h2>
+
+<div class="row text-center mb-5">
+
+<div class="col-md-3">
+
+<div class="card bg-primary text-light p-4 shadow stat-card">
+
+<h3>{{ total_users }}</h3>
+
+<p>Total Users</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card bg-success text-light p-4 shadow stat-card">
+
+<h3>{{ total_developers }}</h3>
+
+<p>Total Developers</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card bg-info text-light p-4 shadow stat-card">
+
+<h3>{{ total_clients }}</h3>
+
+<p>Total Clients</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card bg-secondary text-light p-4 shadow stat-card">
+
+<h3>{{ total_projects }}</h3>
+
+<p>Total Projects</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div class="row text-center mb-5">
+
+<div class="col-md-4">
+
+<div class="card bg-warning text-dark p-4 shadow stat-card">
+
+<h3>{{ pending_projects }}</h3>
+
+<p>Pending Projects</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-4">
+
+<div class="card bg-primary text-light p-4 shadow stat-card">
+
+<h3>{{ active_projects }}</h3>
+
+<p>Active Projects</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-4">
+
+<div class="card bg-success text-light p-4 shadow stat-card">
+
+<h3>{{ completed_projects }}</h3>
+
+<p>Completed Projects</p>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- PLATFORM FINANCE -->
+
+<div class="row text-center mb-5">
+
+<div class="col-md-4">
+
+<div class="card bg-success text-light p-4 shadow">
+
+<h3>₹{{ total_revenue }}</h3>
+<p>Total Platform Revenue</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="card bg-danger text-light p-4 shadow">
+
+<h3>₹{{ total_withdrawn }}</h3>
+<p>Total Withdrawn</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="card bg-warning text-dark p-4 shadow">
+
+<h3>₹{{ balance }}</h3>
+<p>Available Balance</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- PLATFORM WITHDRAW HISTORY -->
+
+<h4 class="text-warning mt-5">Platform Withdraw History</h4>
+
+{% if admin_withdraws %}
+
+<table class="table table-dark table-striped">
+
+<tr>
+<th>ID</th>
+<th>Amount</th>
+<th>Method</th>
+<th>Details</th>
+<th>Date</th>
+</tr>
+
+{% for w in admin_withdraws %}
+
+<tr>
+
+<td>{{ w.id }}</td>
+<td>₹{{ w.amount }}</td>
+<td>{{ w.method }}</td>
+<td>{{ w.details }}</td>
+<td>{{ w.created_at }}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% else %}
+
+<div class="alert alert-info">
+No platform withdraw history.
+</div>
+
+{% endif %}
+
+
+
+<!-- USERS -->
+
+<h4 id="users" class="mb-3 text-warning">Users</h4>
+
+<div class="table-container">
+
+<table class="table table-dark table-striped table-hover">
+
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Email</th>
+<th>Role</th>
+<th>Action</th>
+</tr>
+
+{% for user in users %}
+
+<tr>
+
+<td>{{ user.id }}</td>
+<td>{{ user.name }}</td>
+<td>{{ user.email }}</td>
+<td>{{ user.role }}</td>
+
+<td>
+
+{% if user.is_active %}
+
+<a href="{{ url_for('main.deactivate_user', user_id=user.id) }}"
+class="btn btn-warning btn-sm">
+
+Deactivate
+
+</a>
+
+{% else %}
+
+<a href="{{ url_for('main.activate_user', user_id=user.id) }}"
+class="btn btn-success btn-sm">
+
+Activate
+
+</a>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+
+<!-- PROJECTS -->
+
+<h4 id="projects" class="mt-5 mb-3 text-warning">Projects</h4>
+
+<div class="table-container">
+
+<table class="table table-dark table-striped table-hover">
+
+<tr>
+<th>ID</th>
+<th>Title</th>
+<th>Category</th>
+<th>Budget</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+{% for project in projects %}
+
+<tr>
+
+<td>{{ project.id }}</td>
+<td>{{ project.title }}</td>
+<td>{{ project.category }}</td>
+<td>₹{{ project.budget }}</td>
+
+<td>
+
+{% if project.status == "open" %}
+<span class="badge bg-success">Open</span>
+
+{% elif project.status == "in_progress" %}
+<span class="badge bg-warning text-dark">In Progress</span>
+
+{% else %}
+<span class="badge bg-primary">Completed</span>
+{% endif %}
+
+</td>
+
+<td>
+
+<a href="{{ url_for('main.delete_project', project_id=project.id) }}"
+class="btn btn-danger btn-sm">
+
+Delete
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+
+<!-- PAYMENTS -->
+
+<h4 id="payments" class="mt-5 mb-3 text-warning">Payments</h4>
+
+<div class="table-container">
+
+<table class="table table-dark table-striped table-hover">
+
+<tr>
+<th>ID</th>
+<th>Project</th>
+<th>Client</th>
+<th>Developer</th>
+<th>Total</th>
+<th>Platform Fee</th>
+<th>Developer Earn</th>
+<th>Method</th>
+<th>Status</th>
+</tr>
+
+{% for p in payments %}
+
+<tr>
+
+<td>{{ p.id }}</td>
+<td>{{ p.project.title }}</td>
+<td>{{ p.client.name }}</td>
+<td>{{ p.developer.name }}</td>
+
+<td>₹{{ p.total_amount }}</td>
+<td>₹{{ p.platform_fee }}</td>
+<td>₹{{ p.developer_amount }}</td>
+
+<td>{{ p.method }}</td>
+
+<td>
+
+{% if p.status == "completed" %}
+
+<span class="badge bg-success">Completed</span>
+
+{% elif p.status == "pending" %}
+
+<span class="badge bg-warning text-dark">Pending</span>
+
+{% else %}
+
+<span class="badge bg-danger">Failed</span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+
+
+<!-- WITHDRAW REQUESTS -->
+
+<h4 id="withdraws" class="mt-5 mb-3 text-warning">
+Withdraw Requests
+</h4>
+
+{% if withdraw_requests %}
+
+<div class="table-container">
+
+<table class="table table-dark table-striped">
+
+<tr>
+<th>ID</th>
+<th>Developer</th>
+<th>Amount</th>
+<th>Method</th>
+<th>Details</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+{% for r in withdraw_requests %}
+
+<tr>
+
+<td>{{ r.id }}</td>
+
+<td>{{ r.user.name }}</td>
+
+<td>₹{{ r.amount }}</td>
+
+<td>{{ r.method }}</td>
+
+<td>{{ r.details }}</td>
+
+<td>
+
+{% if r.status == "pending" %}
+
+<span class="badge bg-warning text-dark">
+Pending
+</span>
+
+{% elif r.status == "completed" %}
+
+<span class="badge bg-success">
+Completed
+</span>
+
+{% else %}
+
+<span class="badge bg-danger">
+Rejected
+</span>
+
+{% endif %}
+
+</td>
+
+<td>
+
+{% if r.status == "pending" %}
+
+<a href="{{ url_for('main.approve_withdraw', req_id=r.id) }}"
+class="btn btn-success btn-sm">
+
+Approve
+
+</a>
+
+<a href="{{ url_for('main.reject_withdraw', req_id=r.id) }}"
+class="btn btn-danger btn-sm">
+
+Reject
+
+</a>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info">
+No withdraw requests.
+</div>
+
+{% endif %}
+
+
+<br>
+
+<a href="{{ url_for('main.admin_withdraw') }}"
+class="btn btn-warning">
+
+Withdraw Platform Profit
+
+</a>
+
+
+<!-- ANALYTICS -->
+
+<h4 id="analytics" class="mt-5 mb-3 text-warning">
+Platform Analytics
+</h4>
+
+<canvas id="statsChart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const ctx = document.getElementById('statsChart');
+
+new Chart(ctx, {
+
+type: 'bar',
+
+data: {
+
+labels: ['Users','Projects','Completed'],
+
+datasets: [{
+
+label: 'Platform Stats',
+
+data: [
+
+{{ total_users }},
+{{ total_projects }},
+{{ completed_projects }}
+
+],
+
+backgroundColor: [
+
+'#ffc107',
+'#17a2b8',
+'#28a745'
+
+]
+
+}]
+
+}
+
+});
+
+</script>
+
+</div>
+
+</div>
+
+{% endblock %}

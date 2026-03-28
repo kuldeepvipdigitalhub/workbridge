@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3 class="text-warning mb-4">
+Review Project Work
+</h3>
+
+{% if deliverables %}
+
+{% for d in deliverables %}
+
+<div class="card bg-dark text-light p-3 mb-3">
+
+{% if d.file %}
+<p>
+<strong>File:</strong>
+<a href="{{ url_for('main.uploaded_file', filename=d.file) }}"
+class="btn btn-warning btn-sm">
+
+Download File
+
+</a>
+</p>
+{% endif %}
+
+{% if d.github_link %}
+<p>
+<strong>GitHub:</strong>
+<a href="{{ d.github_link }}" target="_blank">
+{{ d.github_link }}
+</a>
+</p>
+{% endif %}
+
+{% if d.live_link %}
+<p>
+<strong>Live Link:</strong>
+<a href="{{ d.live_link }}" target="_blank">
+{{ d.live_link }}
+</a>
+</p>
+{% endif %}
+
+<p>
+<strong>Notes:</strong>
+{{ d.notes }}
+</p>
+
+</div>
+
+{% endfor %}
+
+<a href="{{ url_for('main.complete_project', project_id=project.id) }}"
+class="btn btn-success">
+
+Approve & Mark Completed
+
+</a>
+
+{% else %}
+
+<div class="alert alert-info">
+No work submitted yet.
+</div>
+
+{% endif %}
+
+{% endblock %}

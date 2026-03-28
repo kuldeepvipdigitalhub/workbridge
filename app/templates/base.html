@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>WorkBridge</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+body{
+background:#1e1e1e;
+color:white;
+}
+
+.navbar{
+background:#000;
+}
+
+.navbar-brand{
+font-size:22px;
+font-weight:bold;
+color:#ffc107;
+}
+
+.navbar-brand:hover{
+color:#ffb300;
+}
+
+.profile-avatar{
+width:35px;
+height:35px;
+border-radius:50%;
+background:#ffc107;
+color:black;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+}
+
+.footer{
+background:#000;
+padding:20px;
+margin-top:60px;
+}
+
+.modal-content{
+background:#2b2b2b;
+color:white;
+}
+
+.form-control{
+background:#3b3b3b;
+border:none;
+color:white;
+}
+
+.form-control:focus{
+background:#3b3b3b;
+color:white;
+box-shadow:none;
+border:1px solid #ffc107;
+}
+
+
+
+
+/* 🔔 Bell animation */
+.bell-icon{
+    font-size:22px;
+    transition:0.3s;
+}
+
+.bell-icon:hover{
+    transform:rotate(15deg) scale(1.2);
+}
+
+/* 🔴 Badge */
+.notification-badge{
+    position:absolute;
+    top:0;
+    right:0;
+    transform:translate(50%,-50%);
+    background:linear-gradient(45deg,#ff4d4d,#ff0000);
+    color:white;
+    font-size:12px;
+    padding:3px 7px;
+    border-radius:50%;
+    animation:pulse 1.5s infinite;
+}
+
+/* Pulse animation */
+@keyframes pulse{
+    0%{transform:translate(50%,-50%) scale(1);}
+    50%{transform:translate(50%,-50%) scale(1.2);}
+    100%{transform:translate(50%,-50%) scale(1);}
+}
+
+/* 📦 Glassmorphism dropdown */
+.notification-dropdown .notification-box{
+    position:absolute !important;
+    top:120%;
+    left:50%;
+    transform:translateX(-50%) scale(0.9);
+    width:340px;
+    max-height:400px;
+    overflow-y:auto;
+    border-radius:15px;
+    padding:0;
+
+    backdrop-filter: blur(15px);
+    background: rgba(30,30,30,0.9);
+    border:1px solid rgba(255,255,255,0.1);
+
+    opacity:0;
+    visibility:hidden;
+    transition:0.3s ease;
+}
+
+/* OPEN ANIMATION */
+.notification-dropdown.show .notification-box{
+    opacity:1;
+    visibility:visible;
+    transform:translateX(-50%) scale(1);
+}
+
+/* 📱 Mobile */
+@media (max-width:768px){
+    .notification-dropdown .notification-box{
+        width:95vw;
+        left:50%;
+        transform:translateX(-50%);
+    }
+}
+
+/* Header */
+.notification-header{
+    padding:12px;
+    background:linear-gradient(45deg,#ffc107,#ff9800);
+    color:black;
+    font-weight:bold;
+    text-align:center;
+    border-radius:15px 15px 0 0;
+}
+
+/* Items */
+.notification-item{
+    padding:12px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    color:white;
+    transition:0.3s;
+}
+
+/* Hover */
+.notification-item:hover{
+    background:rgba(255,255,255,0.1);
+    transform:translateX(5px);
+}
+
+/* Scrollbar */
+.notification-box::-webkit-scrollbar{
+    width:6px;
+}
+.notification-box::-webkit-scrollbar-thumb{
+    background:#ffc107;
+    border-radius:10px;
+}
+
+
+
+
+</style>
+
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+
+<div class="container">
+
+<a class="navbar-brand"
+href="{{ url_for('main.home') }}">
+
+WorkBridge      </a>
+
+<!-- 🔔 Notification Bell -->
+<li class="nav-item dropdown notification-dropdown position-relative">
+
+    <a class="nav-link text-warning position-relative"
+       href="#"
+       id="notificationDropdown"
+       data-bs-toggle="dropdown">
+
+        <span class="bell-icon">🔔</span>
+
+        {% if notifications and notifications|length > 0 %}
+        <span class="notification-badge">
+            {{ notifications|length }}
+        </span>
+        {% endif %}
+
+    </a>
+
+    <ul class="dropdown-menu notification-box shadow">
+
+        <li class="notification-header">
+            🔔 Notifications
+        </li>
+
+        {% if notifications %}
+
+            {% for n in notifications %}
+            <li>
+                <a href="{{ url_for('main.read_notification', noti_id=n.id) }}"
+                   class="dropdown-item notification-item">
+
+                    <strong>{{ n.title }}</strong><br>
+                    <small>{{ n.message }}</small>
+
+                </a>
+            </li>
+            {% endfor %}
+
+        {% else %}
+
+            <li class="dropdown-item text-center text-muted">
+                No notifications
+            </li>
+
+        {% endif %}
+
+    </ul>
+
+</li>
+
+<button class="navbar-toggler"
+data-bs-toggle="collapse"
+data-bs-target="#navMenu">
+
+<span class="navbar-toggler-icon"></span>
+
+</button>
+
+
+
+
+<div class="collapse navbar-collapse" 
+
+
+
+id="navMenu">
+
+<ul class="navbar-nav ms-auto">
+
+{% if current_user.is_authenticated %}
+
+<li class="nav-item dropdown">
+
+<a class="nav-link dropdown-toggle d-flex align-items-center"
+data-bs-toggle="dropdown">
+
+<div class="profile-avatar me-2">
+
+{{ current_user.name[0] }}
+
+</div>
+
+{{ current_user.name }}
+
+</a>
+
+
+<ul class="dropdown-menu dropdown-menu-dark">
+
+<li>
+
+<a class="dropdown-item"
+data-bs-toggle="modal"
+data-bs-target="#profileModal">
+
+<i class="fa fa-user"></i>
+My Profile
+
+</a>
+
+</li>
+{% if current_user.role == "developer" %}
+
+<li>
+
+<a class="dropdown-item"
+href="{{ url_for('main.developer_dashboard') }}">
+
+<i class="fa fa-laptop-code"></i>
+Developer Dashboard
+
+</a>
+
+</li>
+
+{% endif %}
+
+{% if current_user.role == "client" %}
+
+<li>
+
+<a class="dropdown-item"
+href="{{ url_for('main.client_dashboard') }}">
+
+<i class="fa fa-briefcase"></i>
+Client Dashboard
+
+</a>
+
+</li>
+
+{% endif %}
+
+<li>
+
+<a class="dropdown-item"
+data-bs-toggle="modal"
+data-bs-target="#passwordModal">
+
+<i class="fa fa-key"></i>
+Change Password
+
+</a>
+
+</li>
+
+<li><hr class="dropdown-divider"></li>
+
+<li>
+
+<a class="dropdown-item text-danger"
+href="{{ url_for('main.logout') }}">
+
+<i class="fa fa-sign-out-alt"></i>
+Logout
+
+</a>
+
+</li>
+
+</ul>
+
+</li>
+
+{% else %}
+
+<li class="nav-item">
+
+<a class="nav-link"
+href="{{ url_for('main.login') }}">
+
+Login
+
+</a>
+
+</li>
+
+<li class="nav-item">
+
+<a class="nav-link"
+href="{{ url_for('main.register') }}">
+
+Register
+
+</a>
+
+</li>
+
+{% endif %}
+
+{% if current_user.role == "admin" %}
+
+<li class="nav-item">
+
+<a class="nav-link"
+href="{{ url_for('main.admin_dashboard') }}">
+
+Admin Panel
+
+</a>
+
+</li>
+
+{% endif %}
+
+</ul>
+
+</div>
+
+</div>
+
+
+
+</nav>
+
+
+<!-- ================= FLASH MESSAGES ================= -->
+
+<div class="container mt-3">
+
+{% with messages = get_flashed_messages() %}
+
+{% if messages %}
+
+{% for msg in messages %}
+
+<div class="alert alert-info">
+
+{{ msg }}
+
+</div>
+
+{% endfor %}
+
+{% endif %}
+
+{% endwith %}
+
+</div>
+
+
+<!-- ================= PAGE CONTENT ================= -->
+
+<div class="container mt-4">
+
+{% block content %}
+
+{% endblock %}
+
+</div>
+
+
+<!-- ================= PROFILE MODAL ================= -->
+
+<div class="modal fade"
+id="profileModal">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h5 class="modal-title">
+Edit Profile
+</h5>
+
+<button class="btn-close btn-close-white"
+data-bs-dismiss="modal"></button>
+
+</div>
+
+<form method="POST"
+action="{{ url_for('main.update_profile') }}">
+
+<div class="modal-body">
+
+<label>Name</label>
+
+<input name="name"
+class="form-control mb-2"
+value="{{ current_user.name }}">
+
+<label>Email</label>
+
+<input name="email"
+class="form-control mb-2"
+value="{{ current_user.email }}">
+
+{% if current_user.role == "developer" %}
+
+<label>Skills</label>
+
+<input name="skills"
+class="form-control mb-2"
+value="{{ current_user.skills }}"
+placeholder="Python, Flask, React">
+
+<label>Portfolio</label>
+
+<input name="portfolio"
+class="form-control mb-2"
+value="{{ current_user.portfolio }}"
+placeholder="Portfolio URL">
+
+<label>Bio</label>
+
+<textarea name="bio"
+class="form-control mb-2"
+placeholder="Short developer bio">
+
+{{ current_user.bio }}
+
+</textarea>
+
+<label>GitHub</label>
+
+<input name="github"
+class="form-control mb-2"
+value="{{ current_user.github }}"
+placeholder="GitHub Profile">
+
+{% endif %}
+
+</div>
+
+<div class="modal-footer">
+
+<button class="btn btn-warning">
+
+Update Profile
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ================= PASSWORD MODAL ================= -->
+
+<div class="modal fade"
+id="passwordModal">
+
+<div class="modal-dialog">
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h5 class="modal-title">
+Change Password
+</h5>
+
+<button class="btn-close btn-close-white"
+data-bs-dismiss="modal"></button>
+
+</div>
+
+<form method="POST"
+action="{{ url_for('main.change_password') }}">
+
+<div class="modal-body">
+
+<input type="password"
+name="old_password"
+class="form-control mb-2"
+placeholder="Old Password"
+required>
+
+<input type="password"
+name="new_password"
+class="form-control mb-2"
+placeholder="New Password"
+required>
+
+</div>
+
+<div class="modal-footer">
+
+<button class="btn btn-warning">
+
+Update Password
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer class="footer text-center">
+
+<div class="container">
+
+<p class="mb-1">
+© 2025 WorkBridge Freelance Platform
+</p>
+
+<p class="text-muted">
+
+Hire developers • Post projects • Build faster
+
+</p>
+
+</div>
+
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+
+<div id="particles-js"></div>
+
+<script>
+
+particlesJS("particles-js", {
+
+particles:{
+
+number:{value:50},
+
+size:{value:3},
+
+move:{speed:2}
+
+}
+
+});
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+    const dropdown = document.querySelector('.notification-dropdown');
+
+    dropdown.addEventListener('show.bs.dropdown', function(){
+        dropdown.classList.add('show');
+    });
+
+    dropdown.addEventListener('hide.bs.dropdown', function(){
+        dropdown.classList.remove('show');
+    });
+
+});
+</script>
+
+<style>
+
+#particles-js{
+
+position:fixed;
+
+width:100%;
+
+height:100%;
+
+z-index:-1;
+
+top:0;
+
+left:0;
+
+}
+
+</style>
+
+</body>
+
+</html>

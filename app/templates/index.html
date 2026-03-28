@@ -1,0 +1,842 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+
+.hero{
+padding:120px 0;
+text-align:center;
+background:linear-gradient(135deg,#111,#1f1f1f,#000);
+border-radius:15px;
+margin-bottom:40px;
+animation:fadeIn 1s ease;
+}
+
+.hero h1{
+font-size:48px;
+}
+
+.hero p{
+font-size:20px;
+color:#ccc;
+}
+
+@keyframes fadeIn{
+from{opacity:0; transform:translateY(30px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+.btn-custom{
+padding:12px 25px;
+font-weight:600;
+border-radius:30px;
+}
+
+.stat-card{
+border-radius:12px;
+transition:.3s;
+background:#1a1a1a;
+}
+
+.stat-card:hover{
+transform:translateY(-8px);
+box-shadow:0 10px 30px rgba(255,193,7,.3);
+}
+
+.project-card{
+border-radius:12px;
+background:#1a1a1a;
+transition:.3s;
+}
+
+.project-card:hover{
+transform:scale(1.03);
+box-shadow:0 10px 25px rgba(0,0,0,.6);
+}
+
+.work-card{
+background:#111;
+border-radius:12px;
+transition:.3s;
+}
+
+.work-card:hover{
+transform:translateY(-10px);
+box-shadow:0 10px 30px rgba(255,193,7,.2);
+}
+
+.developer-card{
+background:#1a1a1a;
+border-radius:12px;
+transition:.3s;
+}
+
+.developer-card:hover{
+transform:translateY(-8px);
+box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+
+.avatar{
+width:70px;
+height:70px;
+border-radius:50%;
+background:#ffc107;
+color:black;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+font-weight:bold;
+margin:auto;
+}
+
+.step-icon{
+font-size:45px;
+margin-bottom:15px;
+}
+
+.section{
+margin-top:70px;
+}
+
+</style>
+
+
+<!-- HERO -->
+
+<div class="hero">
+
+<h1 class="text-warning fw-bold">
+WorkBridge Freelance Marketplace
+</h1>
+
+<p>
+Hire Developers • Post Projects • Build Faster
+</p>
+
+{% if not current_user.is_authenticated %}
+
+<a href="{{ url_for('main.register') }}"
+class="btn btn-warning btn-custom m-2">
+
+Get Started
+
+</a>
+
+<a href="{{ url_for('main.login') }}"
+class="btn btn-outline-light btn-custom m-2">
+
+Login
+
+</a>
+
+{% endif %}
+
+</div>
+
+<!-- PROJECT SEARCH -->
+
+<div class="container mb-5">
+
+<div class="row justify-content-center">
+
+<div class="col-md-8">
+
+<form method="GET" action="/search">
+
+<div class="input-group">
+
+<input type="text"
+name="q"
+class="form-control form-control-lg"
+placeholder="Search projects, skills, developers...">
+
+<button class="btn btn-warning">
+
+Search
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- STATS -->
+
+<div class="row text-center section">
+
+<div class="col-md-4">
+
+<div class="card stat-card text-light p-4 shadow">
+
+<h2 class="text-warning counter">{{ total_projects }}</h2>
+
+<p>Total Projects</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="card stat-card text-light p-4 shadow">
+
+<h2 class="text-warning counter">{{ total_users }}</h2>
+
+<p>Users</p>
+
+</div>
+
+</div>
+
+<div class="col-md-4">
+
+<div class="card stat-card text-light p-4 shadow">
+
+<h2 class="text-warning counter">{{ completed_projects }}</h2>
+
+<p>Completed</p>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- BROWSE CATEGORIES -->
+
+<div class="section">
+
+<h3 class="text-warning text-center mb-5">
+Browse Project Categories
+</h3>
+
+<div class="row">
+
+{% for category,count in categories %}
+
+<div class="col-md-3 mb-4">
+
+<a href="{{ url_for('main.category_projects', category=category) }}"
+style="text-decoration:none">
+
+<div class="card category-card text-center p-4">
+
+<div class="category-icon">
+
+{% if category == "Web Development" %}
+🌐
+{% elif category == "Mobile App" %}
+📱
+{% elif category == "UI/UX Design" %}
+🎨
+{% elif category == "AI / ML" %}
+🤖
+{% elif category == "Data Science" %}
+📊
+{% else %}
+💻
+{% endif %}
+
+</div>
+
+<h5 class="text-warning mt-3">
+{{ category }}
+</h5>
+
+<p class="category-count">
+{{ count }} Projects
+</p>
+
+</div>
+
+</a>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+<style>
+
+/* CATEGORY CARD */
+
+.category-card{
+background:#1a1a1a;
+border-radius:12px;
+padding:25px;
+text-align:center;
+color:white;
+transition:.3s;
+border:1px solid #2a2a2a;
+}
+
+/* HOVER */
+
+.category-card:hover{
+transform:translateY(-8px);
+box-shadow:0 10px 25px rgba(255,193,7,.3);
+border-color:#ffc107;
+}
+
+/* TITLE */
+
+.category-card h4{
+color:#ffc107;
+font-weight:600;
+margin-bottom:8px;
+}
+
+/* DESCRIPTION */
+
+.category-card p{
+color:#bbb;
+font-size:14px;
+}
+
+/* CATEGORY COUNT BADGE */
+
+.category-count{
+background:#ffc107;
+color:#000 !important;
+padding:5px 10px;
+border-radius:20px;
+font-size:12px;
+font-weight:700;
+margin-left:6px;
+display:inline-block;
+}
+
+/* ICON */
+
+.category-icon{
+font-size:36px;
+margin-bottom:10px;
+}
+</style>
+
+<!-- LATEST PROJECTS -->
+
+<div class="section">
+
+<h3 class="text-warning mb-4">
+Latest Projects
+</h3>
+
+<div class="row">
+
+{% for project in recent_projects %}
+
+<div class="col-md-4">
+
+<div class="card project-card bg-secondary text-light p-3 mb-3 shadow">
+
+<h5 class="text-warning">
+{{ project.title }}
+</h5>
+
+<p>{{ project.description[:100] }}...</p>
+
+<p>
+<strong>Client:</strong>
+{{ project.client.name }}
+</p>
+
+<p>
+<strong>Budget:</strong> ₹{{ project.budget }}
+</p>
+
+<p>
+<strong>Category:</strong>
+<span class="badge bg-warning text-dark">
+{{ project.category }}
+</span>
+</p>
+
+<p>
+<strong>Total Bids:</strong> {{ project.bids|length }}
+</p>
+
+<div class="d-flex gap-2">
+
+<a href="{{ url_for('main.project_details', project_id=project.id) }}"
+class="btn btn-outline-warning btn-sm">
+View
+</a>
+
+{% set my_bid = project.bids | selectattr('developer_id','equalto',current_user.id) | list %}
+
+{% if my_bid %}
+
+<button class="btn btn-success btn-sm" disabled>
+Bid Submitted
+</button>
+
+<button class="btn btn-info btn-sm"
+data-bs-toggle="modal"
+data-bs-target="#editBidModal{{ project.id }}">
+Edit
+</button>
+
+{% else %}
+
+<button class="btn btn-warning btn-sm"
+onclick="handleBidClick({{ project.id }})">
+Bid
+</button>
+
+{% endif %}
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ================= NEW BID MODAL ================= -->
+
+<div class="modal fade" id="bidModal{{ project.id }}">
+<div class="modal-dialog">
+<div class="modal-content bg-dark text-light">
+
+<form method="POST" action="{{ url_for('main.submit_bid', project_id=project.id) }}">
+
+<div class="modal-header">
+<h5>Place Bid</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+
+<input type="number" name="bid_amount"
+class="form-control mb-2"
+placeholder="Enter Amount" required>
+
+<textarea name="proposal"
+class="form-control"
+placeholder="Write your proposal..." required></textarea>
+
+</div>
+
+<div class="modal-footer">
+<button class="btn btn-warning">Submit</button>
+</div>
+
+</form>
+
+</div>
+</div>
+</div>
+
+<!-- ================= EDIT BID MODAL ================= -->
+
+{% if current_user.is_authenticated and current_user.role == "developer" and my_bid %}
+
+<div class="modal fade" id="editBidModal{{ project.id }}">
+<div class="modal-dialog">
+<div class="modal-content bg-dark text-light">
+
+<form method="POST" action="{{ url_for('main.edit_bid', project_id=project.id) }}">
+
+<div class="modal-header">
+<h5>Edit Bid</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+
+<input type="number" name="bid_amount"
+value="{{ my_bid[0].bid_amount }}"
+class="form-control mb-2">
+
+<textarea name="proposal"
+class="form-control">{{ my_bid[0].proposal }}</textarea>
+
+</div>
+
+<div class="modal-footer">
+<button class="btn btn-warning">Update</button>
+</div>
+
+</form>
+
+</div>
+</div>
+</div>
+
+{% endif %}
+
+{% endfor %}
+
+</div>
+
+</div>
+
+
+<!-- HOW IT WORKS -->
+
+<div class="section">
+
+<h2 class="text-center text-warning mb-5">
+
+How WorkBridge Works
+
+</h2>
+
+<div class="row text-center">
+
+<div class="col-md-3">
+
+<div class="card work-card text-light p-4">
+
+<div class="step-icon">📌</div>
+
+<h5>Post Project</h5>
+
+<p>Clients post project requirements and budget.</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card work-card text-light p-4">
+
+<div class="step-icon">💻</div>
+
+<h5>Developers Bid</h5>
+
+<p>Developers submit proposals and pricing.</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card work-card text-light p-4">
+
+<div class="step-icon">🤝</div>
+
+<h5>Select Developer</h5>
+
+<p>Client reviews bids and selects developer.</p>
+
+</div>
+
+</div>
+
+
+<div class="col-md-3">
+
+<div class="card work-card text-light p-4">
+
+<div class="step-icon">🚀</div>
+
+<h5>Complete Project</h5>
+
+<p>Project delivered and reviewed.</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- BENEFITS -->
+
+<div class="section">
+
+<h3 class="text-center text-warning mb-4">
+
+Why Use WorkBridge?
+
+</h3>
+
+<div class="row text-center">
+
+<div class="col-md-3">
+
+<h5>⚡ Fast Hiring</h5>
+
+<p>Find developers instantly.</p>
+
+</div>
+
+<div class="col-md-3">
+
+<h5>💰 Secure Payments</h5>
+
+<p>Transparent bidding system.</p>
+
+</div>
+
+<div class="col-md-3">
+
+<h5>⭐ Trusted Developers</h5>
+
+<p>Review based reputation.</p>
+
+</div>
+
+<div class="col-md-3">
+
+<h5>🚀 Grow Faster</h5>
+
+<p>Scale your projects easily.</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- TOP DEVELOPERS -->
+
+<div class="section">
+
+<h3 class="text-center text-warning mb-4">
+
+Top Developers
+
+</h3>
+
+<div class="row text-center">
+
+{% for dev in top_developers %}
+
+<div class="col-md-3">
+
+<div class="card developer-card text-light p-4 shadow">
+
+<div class="avatar mb-3">
+
+{{ dev.name[0] }}
+
+</div>
+
+<h5>{{ dev.name }}</h5>
+
+<p class="text-warning">
+
+⭐ {{ dev.avg_rating if dev.avg_rating else "New" }}
+
+</p>
+<a href="{{ url_for('main.developer_profile', user_id=dev.id) }}"
+class="btn btn-warning btn-sm">
+
+View Profile
+
+</a>
+
+<p class="text-muted">
+
+Developer
+
+</p>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</div>
+
+
+<h3 class="text-warning text-center mt-5 mb-4">
+Featured Freelancers
+</h3>
+
+<div id="freelancerSlider" class="carousel slide" data-bs-ride="carousel">
+
+<div class="carousel-inner">
+
+{% for dev in top_developers %}
+
+<div class="carousel-item {% if loop.first %}active{% endif %}">
+
+<div class="text-center">
+
+<div class="avatar mb-3">
+
+{{ dev.name[0] }}
+
+</div>
+
+<h4>{{ dev.name }}</h4>
+
+<p class="text-warning">
+⭐ {{ dev.avg_rating if dev.avg_rating else "New" }}
+</p>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<button class="carousel-control-prev"
+type="button"
+data-bs-target="#freelancerSlider"
+data-bs-slide="prev">
+
+<span class="carousel-control-prev-icon"></span>
+
+</button>
+
+<button class="carousel-control-next"
+type="button"
+data-bs-target="#freelancerSlider"
+data-bs-slide="next">
+
+<span class="carousel-control-next-icon"></span>
+
+</button>
+
+
+
+</div>
+<hr class="my-5">
+
+<h3 class="text-warning text-center mb-4">
+What Our Users Say
+</h3>
+
+<div class="row text-center">
+
+<div class="col-md-4">
+
+<div class="card bg-dark text-light p-4">
+
+<p>
+"WorkBridge helped me hire developers quickly."
+</p>
+
+<h6 class="text-warning">
+Client
+</h6>
+
+</div>
+
+</div>
+
+
+<div class="col-md-4">
+
+<div class="card bg-dark text-light p-4">
+
+<p>
+"I earned my first freelance income here."
+</p>
+
+<h6 class="text-warning">
+Developer
+</h6>
+
+</div>
+
+</div>
+
+
+<div class="col-md-4">
+
+<div class="card bg-dark text-light p-4">
+
+<p>
+"Best platform for project bidding."
+</p>
+
+<h6 class="text-warning">
+Startup Founder
+</h6>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* COUNTER ANIMATION */
+
+const counters = document.querySelectorAll('.counter');
+
+counters.forEach(counter => {
+
+let start = 0;
+
+let end = counter.innerText;
+
+let duration = 1500;
+
+let step = end / (duration / 16);
+
+function update(){
+
+start += step;
+
+if(start >= end){
+
+counter.innerText = end;
+
+}else{
+
+counter.innerText = Math.floor(start);
+
+requestAnimationFrame(update);
+
+}
+
+}
+
+update();
+
+});
+
+</script>
+
+<script>
+function handleBidClick(projectId){
+
+    {% if not current_user.is_authenticated %}
+        alert("Please login first to place a bid.");
+        window.location.href = "{{ url_for('main.login') }}";
+
+    {% elif current_user.role not in ['developer','admin'] %}
+        alert("Only developers and admin can bid on this project.");
+
+    {% else %}
+        var modal = new bootstrap.Modal(
+            document.getElementById("bidModal" + projectId)
+        );
+        modal.show();
+    {% endif %}
+
+}
+</script>
+
+{% endblock %}

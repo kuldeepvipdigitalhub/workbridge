@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3 class="text-warning mb-4">Withdraw Earnings</h3>
+
+<div class="card bg-dark text-light p-4 shadow">
+
+<p>
+Available Balance: ₹{{ balance }}
+</p>
+
+<form method="POST">
+
+<input name="amount"
+type="number"
+class="form-control mb-2"
+placeholder="Amount">
+
+<select name="method"
+class="form-control mb-2">
+
+<option>UPI</option>
+<option>Bank Transfer</option>
+
+</select>
+
+<input name="details"
+class="form-control mb-3"
+placeholder="UPI ID / Bank Details">
+
+<button class="btn btn-warning">
+Request Withdraw
+</button>
+
+</form>
+
+</div>
+
+{% endblock %}

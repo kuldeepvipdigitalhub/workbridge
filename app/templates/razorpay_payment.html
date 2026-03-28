@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+<h3 class="text-warning mb-4">
+💳 Secure Online Payment
+</h3>
+
+
+<div class="row">
+
+<!-- PAYMENT DETAILS -->
+
+<div class="col-md-6">
+
+<div class="card bg-dark text-light p-4 shadow payment-card">
+
+<h5 class="text-warning mb-3">
+Project Payment Summary
+</h5>
+
+<hr>
+
+<p>
+<strong>Project:</strong> {{ project.title }}
+</p>
+
+<p>
+<strong>Budget:</strong> ₹{{ project.budget }}
+</p>
+
+<p>
+<strong>Platform Fee (10%):</strong>
+₹{{ project.budget * 0.10 }}
+</p>
+
+<p>
+<strong>Developer Receives:</strong>
+₹{{ project.budget * 0.90 }}
+</p>
+
+<hr>
+
+<p class="text-success">
+✔ Secure payment powered by Razorpay
+</p>
+
+</div>
+
+</div>
+
+
+<!-- PAYMENT BUTTON -->
+
+<div class="col-md-6">
+
+<div class="card bg-dark text-light p-4 shadow payment-card">
+
+<h5 class="text-warning mb-3">
+Complete Payment
+</h5>
+
+<p>
+Click the button below to pay securely using:
+</p>
+
+<ul>
+<li>UPI</li>
+<li>Debit Card</li>
+<li>Credit Card</li>
+<li>Net Banking</li>
+<li>Wallet</li>
+</ul>
+
+<button id="payBtn"
+class="btn btn-warning btn-lg w-100">
+
+Pay ₹{{ project.budget }}
+
+</button>
+
+<p class="mt-3 text-muted">
+🔒 Your payment is protected by WorkBridge escrow system
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+
+var options = {
+
+key: "{{ razorpay_key }}",
+
+amount: {{ project.budget * 100 }},
+
+currency: "INR",
+
+name: "WorkBridge",
+
+description: "Project Payment",
+
+image: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+
+handler: function (response){
+
+console.log(response);
+
+alert("✅ Payment Successful!");
+
+window.location.href = "{{ url_for('main.payment_success', project_id=project.id) }}";
+
+},
+
+prefill: {
+
+name: "{{ current_user.name }}",
+
+email: "{{ current_user.email }}"
+
+},
+
+notes: {
+
+project_id: "{{ project.id }}",
+
+platform: "WorkBridge"
+
+},
+
+theme: {
+
+color: "#ffc107"
+
+},
+
+modal: {
+
+ondismiss: function(){
+
+alert("Payment cancelled");
+
+}
+
+}
+
+};
+
+
+var rzp = new Razorpay(options);
+
+
+document.getElementById("payBtn").onclick = function(e){
+
+document.getElementById("payBtn").innerText = "Processing...";
+
+document.getElementById("payBtn").disabled = true;
+
+rzp.open();
+
+e.preventDefault();
+
+}
+
+</script>
+
+
+<style>
+
+.payment-card{
+border-radius:12px;
+transition:0.3s;
+}
+
+.payment-card:hover{
+transform:translateY(-5px);
+box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+</style>
+
+{% endblock %}

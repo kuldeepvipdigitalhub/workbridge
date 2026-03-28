@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+
+<h3 class="text-warning mb-4">
+Edit Your Bid
+</h3>
+
+<div class="card bg-dark text-light p-4 shadow">
+
+<form method="POST" action="{{ url_for('main.edit_bid', project_id=bid.project_id) }}">
+
+<div class="mb-3">
+<label>Bid Amount</label>
+<input type="number"
+name="bid_amount"
+value="{{ bid.bid_amount }}"
+class="form-control" required>
+</div>
+
+<div class="mb-3">
+<label>Proposal</label>
+<textarea name="proposal"
+class="form-control" required>{{ bid.proposal }}</textarea>
+</div>
+
+<button class="btn btn-warning">
+Update Bid
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}
